@@ -1,23 +1,24 @@
 module Elasticband
   module Query
     class Match < Base
-      attr_accessor :field, :options
+      attr_accessor :query, :field, :options
 
       def initialize(query, field = :_all, options = {})
-        super(query)
-
+        self.query = query
         self.field = field.to_sym
         self.options = options
       end
 
-      def query
-        return @query if options.blank?
-
-        { query: @query }.merge!(options)
+      def to_h
+        { match: { field => query_hash } }
       end
 
-      def to_h
-        { match: { field => query } }
+      private
+
+      def query_hash
+        return query if options.blank?
+
+        { query: query }.merge!(options)
       end
     end
   end
