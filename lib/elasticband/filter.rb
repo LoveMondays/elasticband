@@ -1,3 +1,4 @@
+require 'elasticband/filter/and'
 require 'elasticband/filter/not'
 require 'elasticband/filter/term'
 
