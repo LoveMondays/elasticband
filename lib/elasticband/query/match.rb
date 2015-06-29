@@ -11,7 +11,7 @@ module Elasticband
       end
 
       def query
-        return @query if options.empty?
+        return @query if options.blank?
 
         { query: @query }.merge!(options)
       end

@@ -17,6 +17,8 @@ Gem::Specification.new do |s|
   s.email       = ['ggcampinho@gmail.com', 'rubensmabueno@hotmail.com']
   s.files       = `git ls-files -z`.split("\x0")
 
+  s.add_dependency 'activesupport'
+
   s.add_development_dependency 'dotenv'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '~> 3.3.0'
