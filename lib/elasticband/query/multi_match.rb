@@ -3,7 +3,7 @@ module Elasticband
     class MultiMatch < Base
       attr_accessor :fields, :options
 
-      def initialize(fields, query, options = {})
+      def initialize(query, fields, options = {})
         super(query)
 
         self.fields = Array.wrap(fields).map(&:to_sym)

@@ -3,7 +3,7 @@ module Elasticband
     class Match < Base
       attr_accessor :field, :options
 
-      def initialize(field, query, options = {})
+      def initialize(query, field, options = {})
         super(query)
 
         self.field = field.to_sym
