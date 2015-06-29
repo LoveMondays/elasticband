@@ -6,7 +6,7 @@ module Elasticband
       def initialize(field, query, options = {})
         super(query)
 
-        self.field = field
+        self.field = field.to_sym
         self.options = options
       end
 
@@ -17,7 +17,7 @@ module Elasticband
       end
 
       def to_h
-        { match: { field.to_sym => query } }
+        { match: { field => query } }
       end
     end
   end
