@@ -1,14 +1,18 @@
 require 'spec_helper'
 
 RSpec.describe Elasticband::Query::Match do
-  let(:match) { described_class.new(field, query) }
 
   describe '.to_h' do
-    subject { match.to_h }
+    context 'without options' do
+      subject { described_class.new(:field_name, 'q').to_h }
 
-    let(:field) { :field_name }
-    let(:query) { 'q' }
+      it { is_expected.to eq(match: { field_name: 'q' }) }
+    end
 
-    it { is_expected.to eq(match: { field_name: 'q' }) }
+    context 'with options' do
+      subject { described_class.new(:field_name, 'q', operator: :and).to_h }
+
+      it { is_expected.to eq(match: { field_name: { query: 'q', operator: :and } }) }
+    end
   end
 end
