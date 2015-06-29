@@ -10,7 +10,13 @@ module Elasticband
       end
 
       def to_h
-        { term: { field => filter }.merge!(options) }
+        { term: filter_hash }
+      end
+
+      private
+
+      def filter_hash
+        { field => filter }.merge!(options)
       end
     end
   end

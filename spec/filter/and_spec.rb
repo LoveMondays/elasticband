@@ -19,7 +19,7 @@ RSpec.describe Elasticband::Filter::And do
     context 'with multiple filters' do
       subject { described_class.new([filter_1, filter_2]).to_h }
 
-      it { is_expected.to eq(and: ['filter_1', 'filter_2']) }
+      it { is_expected.to eq(and: %w(filter_1 filter_2)) }
     end
 
     context 'with options' do
