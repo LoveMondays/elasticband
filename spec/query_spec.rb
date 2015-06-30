@@ -13,5 +13,27 @@ RSpec.describe Elasticband::Query do
 
       it { is_expected.to eq(match: { _all: 'foo' }) }
     end
+
+    context 'with options' do
+      subject { described_class.parse('foo', options) }
+
+      context 'with a single field on `:on` option' do
+        let(:options) { { on: :name } }
+
+        it { is_expected.to eq(match: { name: 'foo' }) }
+      end
+
+      context 'with multiple fields on `:on` option' do
+        let(:options) { { on: %i(name description) } }
+
+        it { is_expected.to eq(multi_match: { query: 'foo', fields: %i(name description) }) }
+      end
+
+      context 'with a composed name on `:on` option' do
+        let(:options) { { on: 'company.name' } }
+
+        it { is_expected.to eq(match: { 'company.name': 'foo' }) }
+      end
+    end
   end
 end
