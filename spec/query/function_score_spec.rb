@@ -2,10 +2,10 @@ require 'spec_helper'
 
 RSpec.describe Elasticband::Query::FunctionScore do
   describe '.to_h' do
-    let(:other_query) { Elasticband::Query::Base.new }
-    let(:filter) { Elasticband::Filter::Base.new }
-    let(:score_function_1) { double }
-    let(:score_function_2) { double }
+    let(:other_query) { Elasticband::Query.new }
+    let(:filter) { Elasticband::Filter.new }
+    let(:score_function_1) { Elasticband::Query::ScoreFunction.new }
+    let(:score_function_2) { Elasticband::Query::ScoreFunction.new }
 
     before do
       allow(other_query).to receive(:to_h) { 'query' }

@@ -1,6 +1,6 @@
 module Elasticband
-  module Filter
-    class Query < Base
+  class Filter
+    class Query < Filter
       attr_accessor :query, :options
 
       def initialize(query, options = {})

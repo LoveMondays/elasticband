@@ -1,7 +1,7 @@
 module Elasticband
-  module Query
-    module ScoreFunction
-      class BoostFactor
+  class Query
+    class ScoreFunction
+      class BoostFactor < ScoreFunction
         attr_accessor :boost
 
         def initialize(boost)

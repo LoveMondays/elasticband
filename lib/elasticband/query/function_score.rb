@@ -1,6 +1,6 @@
 module Elasticband
-  module Query
-    class FunctionScore < Base
+  class Query
+    class FunctionScore < Query
       attr_accessor :query_or_filter, :function, :options
 
       def initialize(query_or_filter, function, options = {})
@@ -20,7 +20,7 @@ module Elasticband
       end
 
       def query_or_filter_hash
-        if query_or_filter.is_a?(Query::Base)
+        if query_or_filter.is_a?(Query)
           { query: query_or_filter.to_h }
         else
           { filter: query_or_filter.to_h }

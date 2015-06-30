@@ -1,7 +1,7 @@
 module Elasticband
-  module Query
-    module ScoreFunction
-      class Filtered
+  class Query
+    class ScoreFunction
+      class Filtered < ScoreFunction
         attr_accessor :filter, :score_function, :options
 
         def initialize(filter, score_function, options = {})

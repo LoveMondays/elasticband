@@ -1,7 +1,7 @@
 module Elasticband
-  module Query
-    module ScoreFunction
-      class FieldValueFactor
+  class Query
+    class ScoreFunction
+      class FieldValueFactor < ScoreFunction
         attr_accessor :field, :options
 
         def initialize(field, options = {})

@@ -1,6 +1,6 @@
 module Elasticband
-  module Filter
-    class Terms < Base
+  class Filter
+    class Terms < Filter
       attr_accessor :filters, :field, :options
 
       def initialize(filters, field, options = {})

@@ -1,6 +1,6 @@
 module Elasticband
-  module Query
-    class Match < Base
+  class Query
+    class Match < Query
       attr_accessor :query, :field, :options
 
       def initialize(query, field = :_all, options = {})

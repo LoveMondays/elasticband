@@ -3,8 +3,11 @@ require 'elasticband/query/score_function/field_value_factor'
 require 'elasticband/query/score_function/filtered'
 
 module Elasticband
-  module Query
-    module ScoreFunction
+  class Query
+    class ScoreFunction
+      def to_h
+        {}
+      end
     end
   end
 end

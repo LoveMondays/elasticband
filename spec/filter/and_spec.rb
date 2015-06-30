@@ -2,8 +2,8 @@ require 'spec_helper'
 
 RSpec.describe Elasticband::Filter::And do
   describe '.to_h' do
-    let(:filter_1) { Elasticband::Filter::Base.new }
-    let(:filter_2) { Elasticband::Filter::Base.new }
+    let(:filter_1) { Elasticband::Filter.new }
+    let(:filter_2) { Elasticband::Filter.new }
 
     before do
       allow(filter_1).to receive(:to_h) { 'filter_1' }

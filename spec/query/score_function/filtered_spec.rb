@@ -2,8 +2,8 @@ require 'spec_helper'
 
 RSpec.describe Elasticband::Query::ScoreFunction::Filtered do
   describe '.to_h' do
-    let(:other_score_function) { double }
-    let(:filter) { Elasticband::Filter::Base.new }
+    let(:other_score_function) { Elasticband::Query::ScoreFunction.new }
+    let(:filter) { Elasticband::Filter.new }
 
     before do
       allow(other_score_function).to receive(:to_h) { { function_name: 'score_function' } }
