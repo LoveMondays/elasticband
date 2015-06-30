@@ -57,5 +57,20 @@ RSpec.describe Elasticband::Query::FunctionScore do
         )
       end
     end
+
+    context 'with a filtered function' do
+      let(:filtered_function) { Elasticband::Query::ScoreFunction::Filtered.new(filter, score_function_1) }
+
+      subject { described_class.new(other_query, filtered_function).to_h }
+
+      it 'returns a hash with the query/filter and an array with the function' do
+        is_expected.to eq(
+          function_score: {
+            query: 'query',
+            functions: [{ filter: 'filter', score_function_1: 'score_function_1' }]
+          }
+        )
+      end
+    end
   end
 end

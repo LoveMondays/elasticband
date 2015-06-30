@@ -28,7 +28,16 @@ module Elasticband
       end
 
       def function_hash
-        function.is_a?(Enumerable) ? { functions: function.map(&:to_h) } : function.to_h
+        if function.is_a?(Enumerable)
+          { functions: function.map(&:to_h) }
+        else
+          function_hash = function.to_h
+          if function_hash.key?(:filter)
+            { functions: [function_hash] }
+          else
+            function_hash
+          end
+        end
       end
     end
   end
