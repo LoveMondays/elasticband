@@ -190,6 +190,85 @@ RSpec.describe Elasticband::Query do
           )
         end
       end
+
+      context 'with `:boost_where` option' do
+        context 'with a regular attribute' do
+          let(:options) { { boost_where: { status: :published } } }
+
+          it 'returns a function score query with a `boost_factor` filtered function' do
+            is_expected.to eq(
+              function_score: {
+                query: { match: { _all: 'foo' } },
+                functions: [
+                  {
+                    filter: { term: { status: :published } },
+                    boost_factor: 1000
+                  }
+                ]
+              }
+            )
+          end
+        end
+
+        context 'with a multiple attributes' do
+          let(:options) { { boost_where: { status: :published, company_id: 1 } } }
+
+          it 'returns a function score query with a `boost_factor` filtered function' do
+            is_expected.to eq(
+              function_score: {
+                query: { match: { _all: 'foo' } },
+                functions: [
+                  {
+                    filter: {
+                      and: [
+                        { term: { status: :published } },
+                        term: { company_id: 1 }
+                      ]
+                    },
+                    boost_factor: 1000
+                  }
+                ]
+              }
+            )
+          end
+        end
+
+        context 'with a nested attribute' do
+          let(:options) { { boost_where: { company: { id: 1 } } } }
+
+          it 'returns a function score query with a `boost_factor` filtered function' do
+            is_expected.to eq(
+              function_score: {
+                query: { match: { _all: 'foo' } },
+                functions: [
+                  {
+                    filter: { term: { 'company.id': 1 } },
+                    boost_factor: 1000
+                  }
+                ]
+              }
+            )
+          end
+        end
+
+        context 'with multiple values' do
+          let(:options) { { boost_where: { status: %i(published rejected) } } }
+
+          it 'returns a function score query with a `boost_factor` filtered function' do
+            is_expected.to eq(
+              function_score: {
+                query: { match: { _all: 'foo' } },
+                functions: [
+                  {
+                    filter: { terms: { status: %i(published rejected) } },
+                    boost_factor: 1000
+                  }
+                ]
+              }
+            )
+          end
+        end
+      end
     end
   end
 end

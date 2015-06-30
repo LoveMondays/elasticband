@@ -20,6 +20,8 @@ module Elasticband
       # * `except`: Filter the search results where the condition is `false`.
       # * `boost_by:` Boosts the score of a query result based on a attribute of the document.
       #   This score will be multiplied for the `boost_by` attribute over function `ln2p`.
+      # * `boost_where:` Boosts the score of a query result where some condition is `true`.
+      #   This score will be multiplied by 1000 (arbitrary, based on gem `searchkick`)
       #
       # #### Examples
       # ```
@@ -40,11 +42,21 @@ module Elasticband
       #
       # Query.parse('foo', boost_by: :contents_count)
       # => { function_score: { query: ..., field_value_factor: { field: :contents_count, modifier: :ln2p } } }
+      #
+      # Query.parse('foo', boost_where: { company: { id: 1 } })
+      # => {
+      #      function_score: {
+      #        query: ...,
+      #        functions: [
+      #          { filter: { term: { 'company.id': 1 } }, boost_factor: 1000 }
+      #        ]
+      #      }
+      #    }
       # ```
       def parse(query_text, options = {})
         query = parse_on(query_text, options[:on])
         query = parse_only_and_except(query, options[:only], options[:except])
-        query = parse_boost(query, options[:boost_by])
+        query = parse_boost(query, options[:boost_by], options[:boost_where])
         query.to_h
       end
 
@@ -72,9 +84,13 @@ module Elasticband
         return query if only_options.blank? && except_options.blank?
 
         filter = parse_filters(only_options) + parse_filters(except_options).map { |f| Filter::Not.new(f) }
-        filter = filter.count > 1 ? Filter::And.new(filter) : filter.first
+        filter = join_filters(filter)
 
         Query::Filtered.new(filter, query)
+      end
+
+      def join_filters(filters)
+        filters.count > 1 ? Filter::And.new(filters) : filters.first
       end
 
       def parse_filters(options)
@@ -91,12 +107,20 @@ module Elasticband
         end
       end
 
-      def parse_boost(query, boost_by_options)
-        return query if boost_by_options.blank?
+      def parse_boost(query, boost_by_options, boost_where_options)
+        return query if boost_by_options.blank? && boost_where_options.blank?
 
-        function = ScoreFunction::FieldValueFactor.new(boost_by_options, modifier: :ln2p)
-
+        function = parse_boost_function(boost_by_options, boost_where_options)
         Query::FunctionScore.new(query, function)
+      end
+
+      def parse_boost_function(boost_by_options, boost_where_options)
+        if boost_by_options.present?
+          ScoreFunction::FieldValueFactor.new(boost_by_options, modifier: :ln2p)
+        else
+          filter = join_filters(parse_filters(boost_where_options))
+          ScoreFunction::Filtered.new(filter, ScoreFunction::BoostFactor.new(1_000))
+        end
       end
     end
   end
