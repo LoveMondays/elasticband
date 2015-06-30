@@ -17,6 +17,7 @@ module Elasticband
       #
       # * `on:` Defines which attributes will searched in documents
       # * `only:` Filter the search results where the condition is `true`
+      # * `except`: Filter the search results where the condition is `false`.
       #
       # #### Examples
       # ```
@@ -30,12 +31,14 @@ module Elasticband
       # => { multi_match: { query: 'foo', fields: [:name, :description] } }
       #
       # Query.parse('foo', only: { status: :published })
-      # => { filtered: { query: { match: { _all: 'foo' } }, filter: { status: :published } } }
+      # => { filtered: { query: ..., filter: { term: { status: :published } } } }
       #
+      # Query.parse('foo', except: { company: { id: 1 } })
+      # => { filtered: { query: ..., filter: { not: { term: { status: :published } } } } }
       # ```
       def parse(query_text, options = {})
         query = parse_on(query_text, options[:on])
-        query = parse_only(query, options[:only])
+        query = parse_only_and_except(query, options[:only], options[:except])
         query.to_h
       end
 
@@ -59,13 +62,19 @@ module Elasticband
         end
       end
 
-      def parse_only(query, only_options)
-        return query if only_options.blank?
+      def parse_only_and_except(query, only_options, except_options)
+        return query if only_options.blank? && except_options.blank?
 
-        filter = to_dotted_notation(only_options).map { |attribute, value| parse_filter(attribute, value) }
+        filter = parse_filters(only_options) + parse_filters(except_options).map { |f| Filter::Not.new(f) }
         filter = filter.count > 1 ? Filter::And.new(filter) : filter.first
 
         Query::Filtered.new(filter, query)
+      end
+
+      def parse_filters(options)
+        return [] if options.blank?
+
+        to_dotted_notation(options).map { |attribute, value| parse_filter(attribute, value) }
       end
 
       def parse_filter(attribute, value)
