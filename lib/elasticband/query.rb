@@ -9,5 +9,18 @@ module Elasticband
     def to_h
       { match_all: {} }
     end
+
+    class << self
+      # Parses a query text with options to a Elasticsearch syntax
+      #
+      # #### Examples
+      # ```
+      # Query.parse('foo')
+      # => { match: { _all: 'foo' } }
+      # ```
+      def parse(query, options = {})
+        return Match.new(query).to_h if options.blank?
+      end
+    end
   end
 end
