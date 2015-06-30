@@ -16,7 +16,7 @@ module Elasticband
       private
 
       def query_hash
-        { query: @query }.merge!(options).merge!(fields: fields)
+        { query: query }.merge!(options).merge!(fields: fields)
       end
     end
   end
