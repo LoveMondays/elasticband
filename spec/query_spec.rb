@@ -17,22 +17,83 @@ RSpec.describe Elasticband::Query do
     context 'with options' do
       subject { described_class.parse('foo', options) }
 
-      context 'with a single field on `:on` option' do
-        let(:options) { { on: :name } }
+      context 'with `:on` option' do
+        context 'with a single field' do
+          let(:options) { { on: :name } }
 
-        it { is_expected.to eq(match: { name: 'foo' }) }
+          it { is_expected.to eq(match: { name: 'foo' }) }
+        end
+
+        context 'with multiple fields on `:on` option' do
+          let(:options) { { on: %i(name description) } }
+
+          it { is_expected.to eq(multi_match: { query: 'foo', fields: %i(name description) }) }
+        end
+
+        context 'with a composed name on `:on` option' do
+          let(:options) { { on: 'company.name' } }
+
+          it { is_expected.to eq(match: { 'company.name': 'foo' }) }
+        end
       end
 
-      context 'with multiple fields on `:on` option' do
-        let(:options) { { on: %i(name description) } }
+      context 'with `:only` option' do
+        context 'with a single clause' do
+          let(:options) { { only: { status: :published } } }
 
-        it { is_expected.to eq(multi_match: { query: 'foo', fields: %i(name description) }) }
-      end
+          it 'returns a filtered query with a term filter' do
+            is_expected.to eq(
+              filtered: {
+                query: { match: { _all: 'foo' } },
+                filter: { term: { status: :published } }
+              }
+            )
+          end
+        end
 
-      context 'with a composed name on `:on` option' do
-        let(:options) { { on: 'company.name' } }
+        context 'with multiple clauses' do
+          let(:options) { { only: { status: :published, company_id: 1 } } }
 
-        it { is_expected.to eq(match: { 'company.name': 'foo' }) }
+          it 'returns a filtered query with an and filter' do
+            is_expected.to eq(
+              filtered: {
+                query: { match: { _all: 'foo' } },
+                filter: {
+                  and: [
+                    { term: { status: :published } },
+                    term: { company_id: 1 }
+                  ]
+                }
+              }
+            )
+          end
+        end
+
+        context 'with a nested attribute' do
+          let(:options) { { only: { company: { id: 1 } } } }
+
+          it 'returns a filtered query with a term filter with dotted notation' do
+            is_expected.to eq(
+              filtered: {
+                query: { match: { _all: 'foo' } },
+                filter: { term: { 'company.id': 1 } }
+              }
+            )
+          end
+        end
+
+        context 'with multiple values' do
+          let(:options) { { only: { status: %i(published rejected) } } }
+
+          it 'returns a filtered query with a terms filter' do
+            is_expected.to eq(
+              filtered: {
+                query: { match: { _all: 'foo' } },
+                filter: { terms: { status: %i(published rejected) } }
+              }
+            )
+          end
+        end
       end
     end
   end

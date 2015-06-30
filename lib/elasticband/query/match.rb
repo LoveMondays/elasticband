@@ -3,9 +3,9 @@ module Elasticband
     class Match < Query
       attr_accessor :query, :field, :options
 
-      def initialize(query, field = :_all, options = {})
+      def initialize(query, field = nil, options = {})
         self.query = query
-        self.field = field.to_sym
+        self.field = (field || :_all).to_sym
         self.options = options
       end
 
