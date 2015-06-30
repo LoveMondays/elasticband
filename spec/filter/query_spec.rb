@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Elasticband::Filter::Query do
-  describe '.to_h' do
+  describe '#to_h' do
     let(:query) { Elasticband::Query.new }
 
     before { allow(query).to receive(:to_h) { 'query' } }

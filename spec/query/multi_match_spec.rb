@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Elasticband::Query::MultiMatch do
-  describe '.to_h' do
+  describe '#to_h' do
     context 'without field' do
       subject { described_class.new('q').to_h }
 

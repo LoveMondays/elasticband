@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Elasticband::Filter::Not do
-  describe '.to_h' do
+  describe '#to_h' do
     let(:other_filter) { Elasticband::Filter.new }
 
     before { allow(other_filter).to receive(:to_h) { 'other_filter' } }

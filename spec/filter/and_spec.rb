@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Elasticband::Filter::And do
-  describe '.to_h' do
+  describe '#to_h' do
     let(:filter_1) { Elasticband::Filter.new }
     let(:filter_2) { Elasticband::Filter.new }
 

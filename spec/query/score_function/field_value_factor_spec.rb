@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Elasticband::Query::ScoreFunction::FieldValueFactor do
-  describe '.to_h' do
+  describe '#to_h' do
     context 'without options' do
       subject { described_class.new(:field_name).to_h }
 

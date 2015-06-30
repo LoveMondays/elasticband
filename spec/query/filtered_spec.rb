@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Elasticband::Query::Filtered do
-  describe '.to_h' do
+  describe '#to_h' do
     let(:other_query) { Elasticband::Query.new }
     let(:filter) { Elasticband::Filter.new }
 

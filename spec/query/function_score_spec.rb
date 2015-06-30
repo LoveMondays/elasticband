@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Elasticband::Query::FunctionScore do
-  describe '.to_h' do
+  describe '#to_h' do
     let(:other_query) { Elasticband::Query.new }
     let(:filter) { Elasticband::Filter.new }
     let(:score_function_1) { Elasticband::Query::ScoreFunction.new }

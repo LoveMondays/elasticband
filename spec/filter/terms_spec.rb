@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Elasticband::Filter::Terms do
-  describe '.to_h' do
+  describe '#to_h' do
     context 'with only one value' do
       subject { described_class.new('filter', :field_name).to_h }
 
