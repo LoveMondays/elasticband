@@ -5,7 +5,7 @@ module Elasticband
         attr_accessor :field, :options
 
         def initialize(field, options = {})
-          self.field = field
+          self.field = field.to_sym
           self.options = options
         end
 

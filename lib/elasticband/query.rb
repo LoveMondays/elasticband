@@ -18,6 +18,8 @@ module Elasticband
       # * `on:` Defines which attributes will searched in documents
       # * `only:` Filter the search results where the condition is `true`
       # * `except`: Filter the search results where the condition is `false`.
+      # * `boost_by:` Boosts the score of a query result based on a attribute of the document.
+      #   This score will be multiplied for the `boost_by` attribute over function `ln2p`.
       #
       # #### Examples
       # ```
@@ -35,10 +37,14 @@ module Elasticband
       #
       # Query.parse('foo', except: { company: { id: 1 } })
       # => { filtered: { query: ..., filter: { not: { term: { status: :published } } } } }
+      #
+      # Query.parse('foo', boost_by: :contents_count)
+      # => { function_score: { query: ..., field_value_factor: { field: :contents_count, modifier: :ln2p } } }
       # ```
       def parse(query_text, options = {})
         query = parse_on(query_text, options[:on])
         query = parse_only_and_except(query, options[:only], options[:except])
+        query = parse_boost(query, options[:boost_by])
         query.to_h
       end
 
@@ -83,6 +89,14 @@ module Elasticband
         else
           Filter::Term.new(value, attribute)
         end
+      end
+
+      def parse_boost(query, boost_by_options)
+        return query if boost_by_options.blank?
+
+        function = ScoreFunction::FieldValueFactor.new(boost_by_options, modifier: :ln2p)
+
+        Query::FunctionScore.new(query, function)
       end
     end
   end

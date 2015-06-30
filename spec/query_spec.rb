@@ -174,6 +174,22 @@ RSpec.describe Elasticband::Query do
           end
         end
       end
+
+      context 'with `:boost_by` option' do
+        let(:options) { { boost_by: :contents_count } }
+
+        it 'returns a function score query with a `field_value_factor` function' do
+          is_expected.to eq(
+            function_score: {
+              query: { match: { _all: 'foo' } },
+              field_value_factor: {
+                field: :contents_count,
+                modifier: :ln2p
+              }
+            }
+          )
+        end
+      end
     end
   end
 end
