@@ -1,5 +1,5 @@
 module Elasticband
-  module Query
+  module Filter
     class Base
       def to_h
         raise NotImplementedError

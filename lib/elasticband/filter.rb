@@ -1,3 +1,5 @@
+require 'elasticband/filter/base'
+
 require 'elasticband/filter/and'
 require 'elasticband/filter/not'
 require 'elasticband/filter/query'

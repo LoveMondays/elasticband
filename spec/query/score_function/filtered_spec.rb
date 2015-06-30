@@ -3,7 +3,7 @@ require 'spec_helper'
 RSpec.describe Elasticband::Query::ScoreFunction::Filtered do
   describe '.to_h' do
     let(:other_score_function) { double }
-    let(:filter) { double }
+    let(:filter) { Elasticband::Filter::Base.new }
 
     before do
       allow(other_score_function).to receive(:to_h) { { function_name: 'score_function' } }
