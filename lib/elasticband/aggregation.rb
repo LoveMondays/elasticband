@@ -1,5 +1,6 @@
 require 'elasticband/aggregation/nested'
 require 'elasticband/aggregation/terms'
+require 'elasticband/aggregation/top_hits'
 
 module Elasticband
   class Aggregation
