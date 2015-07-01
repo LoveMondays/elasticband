@@ -1,3 +1,4 @@
+require 'elasticband/aggregation/nested'
 require 'elasticband/aggregation/terms'
 
 module Elasticband
