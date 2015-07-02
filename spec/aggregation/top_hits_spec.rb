@@ -7,16 +7,16 @@ RSpec.describe Elasticband::Aggregation::TopHits do
     let(:root_aggregation) { Elasticband::Aggregation.new(:root_aggregation) }
 
     before do
-      allow(root_aggregation).to receive(:to_h) { { root_aggregation: { key_1: :value_1 } } }
+      allow(root_aggregation).to receive(:to_h) { { root_aggregation: { terms: { field: :field_name } } } }
     end
 
     it 'returns a nested aggreagation hash' do
       is_expected.to eq(
         root_aggregation: {
-          key_1: :value_1,
+          terms: { field: :field_name },
           aggs: {
             top_hits_aggregation: {
-              size: 3
+              top_hits: { size: 3 }
             }
           }
         }

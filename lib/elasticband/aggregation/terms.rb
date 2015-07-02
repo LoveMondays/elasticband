@@ -16,7 +16,7 @@ module Elasticband
       private
 
       def aggregation_hash
-        { field: field }.merge!(options)
+        { terms: { field: field }.merge!(options) }
       end
     end
   end

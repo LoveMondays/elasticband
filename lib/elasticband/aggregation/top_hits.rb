@@ -19,7 +19,7 @@ module Elasticband
       private
 
       def top_hits_hash
-        { size: size }.merge!(options)
+        { top_hits: { size: size }.merge!(options) }
       end
     end
   end
