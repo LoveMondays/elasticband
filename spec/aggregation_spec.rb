@@ -5,13 +5,13 @@ RSpec.describe Elasticband::Aggregation do
     context 'without a aggregation_hash' do
       subject { described_class.new(:aggregation_name).to_h }
 
-      it { is_expected.to eq(aggs: { aggregation_name: {} }) }
+      it { is_expected.to eq(aggregation_name: {}) }
     end
 
     context 'with a aggregation_hash' do
       subject { described_class.new(:aggregation_name).to_h(key: :value) }
 
-      it { is_expected.to eq(aggs: { aggregation_name: { key: :value } }) }
+      it { is_expected.to eq(aggregation_name: { key: :value }) }
     end
   end
 end

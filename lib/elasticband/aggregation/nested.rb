@@ -10,7 +10,7 @@ module Elasticband
 
       def to_h
         root_aggregation.to_h.tap do |h|
-          h[:aggs][root_aggregation.name].merge!(nested_aggregation.to_h)
+          h[root_aggregation.name].merge!(aggs: nested_aggregation.to_h)
         end
       end
     end

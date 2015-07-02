@@ -12,7 +12,7 @@ module Elasticband
 
       def to_h
         root_aggregation.to_h.tap do |h|
-          h[:aggs][root_aggregation.name].merge!(super(top_hits_hash))
+          h[root_aggregation.name].merge!(aggs: super(top_hits_hash))
         end
       end
 

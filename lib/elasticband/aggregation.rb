@@ -11,7 +11,7 @@ module Elasticband
     end
 
     def to_h(aggregation_hash = {})
-      { aggs: { name => aggregation_hash } }
+      { name => aggregation_hash }
     end
   end
 end
