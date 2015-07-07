@@ -73,6 +73,8 @@ module Elasticband
       end
 
       def parse_on(query_text, on_options)
+        return Query.new if query_text.blank?
+
         if on_options.is_a?(Enumerable)
           Query::MultiMatch.new(query_text, on_options)
         else

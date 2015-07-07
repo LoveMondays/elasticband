@@ -8,6 +8,12 @@ RSpec.describe Elasticband::Query do
   end
 
   describe '.parse' do
+    context 'with no query' do
+      subject { described_class.parse('') }
+
+      it { is_expected.to eq(match_all: {}) }
+    end
+
     context 'with only the query text' do
       subject { described_class.parse('foo') }
 
