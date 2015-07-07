@@ -181,6 +181,27 @@ RSpec.describe Elasticband::Query do
         end
       end
 
+      context 'with `:includes` option' do
+        let(:options) { { includes: ['bar', on: :description] } }
+
+        it 'returns a filtered query with query filter' do
+          is_expected.to eq(
+            filtered: {
+              query: { match: { _all: 'foo' } },
+              filter: {
+                query: { match: { description: 'bar' } }
+              }
+            }
+          )
+        end
+
+        it 'calls `.parse` for the includes option' do
+          allow(described_class).to receive(:parse).with('foo', options).and_call_original
+          expect(described_class).to receive(:parse).with('bar', on: :description).and_call_original
+          subject
+        end
+      end
+
       context 'with `:boost_by` option' do
         let(:options) { { boost_by: :contents_count } }
 

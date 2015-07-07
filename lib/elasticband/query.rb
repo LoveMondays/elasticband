@@ -18,6 +18,7 @@ module Elasticband
       # * `on:` Defines which attributes will searched in documents
       # * `only:` Filter the search results where the condition is `true`
       # * `except`: Filter the search results where the condition is `false`.
+      # * `includes:` Filter the search results with a `Match` query.
       # * `boost_by:` Boosts the score of a query result based on a attribute of the document.
       #   This score will be multiplied for the `boost_by` attribute over function `ln2p`.
       # * `boost_where:` Boosts the score of a query result where some condition is `true`.
@@ -40,6 +41,9 @@ module Elasticband
       # Query.parse('foo', except: { company: { id: 1 } })
       # => { filtered: { query: ..., filter: { not: { term: { status: :published } } } } }
       #
+      # Query.parse('foo', includes: ['company', on: :description])
+      # => { filtered: { query: ..., filter: { query: { match: { description: 'company' } } } } }
+      #
       # Query.parse('foo', boost_by: :contents_count)
       # => { function_score: { query: ..., field_value_factor: { field: :contents_count, modifier: :ln2p } } }
       #
@@ -55,7 +59,7 @@ module Elasticband
       # ```
       def parse(query_text, options = {})
         query = parse_on(query_text, options[:on])
-        query = parse_only_and_except(query, options[:only], options[:except])
+        query = parse_query_filters(query, options.slice(:only, :except, :includes))
         query = parse_boost(query, options[:boost_by], options[:boost_where])
         query.to_h
       end
@@ -82,10 +86,12 @@ module Elasticband
         end
       end
 
-      def parse_only_and_except(query, only_options, except_options)
-        return query if only_options.blank? && except_options.blank?
+      def parse_query_filters(query, options)
+        return query if options.blank?
 
-        filter = parse_filters(only_options) + parse_filters(except_options).map { |f| Filter::Not.new(f) }
+        filter = parse_filters(options[:only])
+        filter += parse_filters(options[:except]).map { |f| Filter::Not.new(f) }
+        filter += parse_includes_filter(options[:includes])
         filter = join_filters(filter)
 
         Query::Filtered.new(filter, query)
@@ -93,6 +99,12 @@ module Elasticband
 
       def join_filters(filters)
         filters.count > 1 ? Filter::And.new(filters) : filters.first
+      end
+
+      def parse_includes_filter(includes_options)
+        return [] if includes_options.blank?
+
+        [Filter::Query.new(parse(*includes_options))]
       end
 
       def parse_filters(options)
