@@ -23,6 +23,7 @@ module Elasticband
       #   This score will be multiplied for the `boost_by` attribute over function `ln2p`.
       # * `boost_where:` Boosts the score of a query result where some condition is `true`.
       #   This score will be multiplied by 1000 (arbitrary, based on gem `searchkick`)
+      # * `boost_function:` Boosts using the function passed.
       #
       # #### Examples
       # ```
@@ -47,6 +48,9 @@ module Elasticband
       # Query.parse('foo', boost_by: :contents_count)
       # => { function_score: { query: ..., field_value_factor: { field: :contents_count, modifier: :ln2p } } }
       #
+      # Query.parse('foo', boost_function: "_score * doc['users_count'].value")
+      # => { function_score: { query: ..., script_score: { script: '_score * doc['users_count'].value' } } }
+      #
       # Query.parse('foo', boost_where: { company: { id: 1 } })
       # => {
       #      function_score: {
@@ -60,7 +64,7 @@ module Elasticband
       def parse(query_text, options = {})
         query = parse_on(query_text, options[:on])
         query = parse_query_filters(query, options.slice(:only, :except, :includes))
-        query = parse_boost(query, options[:boost_by], options[:boost_where])
+        query = parse_boost(query, options.slice(:boost_by, :boost_where, :boost_function))
         query.to_h
       end
 
@@ -86,12 +90,12 @@ module Elasticband
         end
       end
 
-      def parse_query_filters(query, options)
-        return query if options.blank?
+      def parse_query_filters(query, filter_options)
+        return query if filter_options.blank?
 
-        filter = parse_filters(options[:only])
-        filter += parse_filters(options[:except]).map { |f| Filter::Not.new(f) }
-        filter += parse_includes_filter(options[:includes])
+        filter = parse_filters(filter_options[:only])
+        filter += parse_filters(filter_options[:except]).map { |f| Filter::Not.new(f) }
+        filter += parse_includes_filter(filter_options[:includes])
         filter = join_filters(filter)
 
         Query::Filtered.new(filter, query)
@@ -121,19 +125,21 @@ module Elasticband
         end
       end
 
-      def parse_boost(query, boost_by_options, boost_where_options)
-        return query if boost_by_options.blank? && boost_where_options.blank?
+      def parse_boost(query, boost_options)
+        return query if boost_options.blank?
 
-        function = parse_boost_function(boost_by_options, boost_where_options)
+        function = parse_boost_function(boost_options)
         Query::FunctionScore.new(query, function)
       end
 
-      def parse_boost_function(boost_by_options, boost_where_options)
-        if boost_by_options.present?
-          ScoreFunction::FieldValueFactor.new(boost_by_options, modifier: :ln2p)
-        else
-          filter = join_filters(parse_filters(boost_where_options))
+      def parse_boost_function(boost_options)
+        if boost_options[:boost_by].present?
+          ScoreFunction::FieldValueFactor.new(boost_options[:boost_by], modifier: :ln2p)
+        elsif boost_options[:boost_where].present?
+          filter = join_filters(parse_filters(boost_options[:boost_where]))
           ScoreFunction::Filtered.new(filter, ScoreFunction::BoostFactor.new(1_000))
+        else
+          ScoreFunction::ScriptScore.new(boost_options[:boost_function])
         end
       end
     end

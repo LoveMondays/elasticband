@@ -218,6 +218,21 @@ RSpec.describe Elasticband::Query do
         end
       end
 
+      context 'with `:boost_function` option' do
+        let(:options) { { boost_function: "_score * doc['users_count'].value" } }
+
+        it 'returns a function score query with a `script_score` function' do
+          is_expected.to eq(
+            function_score: {
+              query: { match: { _all: 'foo' } },
+              script_score: {
+                script: "_score * doc['users_count'].value"
+              }
+            }
+          )
+        end
+      end
+
       context 'with `:boost_where` option' do
         context 'with a regular attribute' do
           let(:options) { { boost_where: { status: :published } } }
