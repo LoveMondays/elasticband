@@ -40,9 +40,8 @@ module Elasticband
       def parse_group_by(options_group_by)
         return {} if options_group_by.blank?
 
-        options_group_by = Array.wrap(options_group_by)
-        options = options_group_by.extract_options!
-        field = options_group_by.first
+        field, options = options_group_by
+        options ||= {}
 
         aggregation = Aggregation::Terms.new(field, field, options.except(:top_hits))
         if options[:top_hits]
