@@ -219,17 +219,37 @@ RSpec.describe Elasticband::Query do
       end
 
       context 'with `:boost_function` option' do
-        let(:options) { { boost_function: "_score * doc['users_count'].value" } }
+        context 'without params' do
+          let(:options) { { boost_function: "_score * doc['users_count'].value" } }
 
-        it 'returns a function score query with a `script_score` function' do
-          is_expected.to eq(
-            function_score: {
-              query: { match: { _all: 'foo' } },
-              script_score: {
-                script: "_score * doc['users_count'].value"
+          it 'returns a function score query with a `script_score` function' do
+            is_expected.to eq(
+              function_score: {
+                query: { match: { _all: 'foo' } },
+                script_score: {
+                  script: "_score * doc['users_count'].value"
+                }
               }
-            }
-          )
+            )
+          end
+        end
+
+        context 'with params' do
+          let(:options) { { boost_function: ['_score * test_param', params: { test_param: 1 }] } }
+
+          it 'returns a function score query with a `script_score` function and params' do
+            is_expected.to eq(
+              function_score: {
+                query: { match: { _all: 'foo' } },
+                script_score: {
+                  script: '_score * test_param',
+                  params: {
+                    test_param: 1
+                  }
+                }
+              }
+            )
+          end
         end
       end
 

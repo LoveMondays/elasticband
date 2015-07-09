@@ -139,7 +139,8 @@ module Elasticband
           filter = join_filters(parse_filters(boost_options[:boost_where]))
           ScoreFunction::Filtered.new(filter, ScoreFunction::BoostFactor.new(1_000))
         else
-          ScoreFunction::ScriptScore.new(boost_options[:boost_function])
+          boost_function, boost_function_params = boost_options[:boost_function]
+          ScoreFunction::ScriptScore.new(boost_function, boost_function_params || {})
         end
       end
     end
