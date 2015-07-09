@@ -13,6 +13,12 @@ RSpec.describe Elasticband::Aggregation do
 
       it { is_expected.to eq(aggregation_name: { key: :value }) }
     end
+
+    context 'with special chars' do
+      subject { described_class.new('aggregation.name').to_h }
+
+      it { is_expected.to eq(aggregation_name: {}) }
+    end
   end
 
   describe '.parse' do

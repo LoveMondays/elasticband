@@ -7,7 +7,7 @@ module Elasticband
     attr_accessor :name
 
     def initialize(name)
-      self.name = name.to_sym
+      self.name = name.to_s.gsub(/\W/, '_').to_sym
     end
 
     def to_h(aggregation_hash = {})
