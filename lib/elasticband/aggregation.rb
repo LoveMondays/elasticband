@@ -1,3 +1,4 @@
+require 'elasticband/aggregation/max'
 require 'elasticband/aggregation/nested'
 require 'elasticband/aggregation/terms'
 require 'elasticband/aggregation/top_hits'
