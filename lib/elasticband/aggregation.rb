@@ -16,40 +16,77 @@ module Elasticband
     end
 
     class << self
-      # Parses some options to a Elasticsearch syntax
+      PARSE_AGGREGATIONS = %i(group_by group_max top_hits)
+
+      # Parses some options to a Elasticsearch syntax, aggregations can be nested in another.
       #
       # #### Options
       #
       # * `group_by:` Count results by the value of an attribute using `terms` filter.
       #   It can receive an array with some attributes:
-      #   * `top_hits:` A number of results that should be return inside the group ranked by score.
       #   * `size:` Size of the results calculated in each shard (https://www.elastic.co/guide/en/elasticsearch/reference/1.x/search-aggregations-bucket-terms-aggregation.html#_size)
+      #   * `script:` Generates terms defined by the script
+      # * `group_max:` Group results by maximum value of a field
+      #   It can receive an array with some attributes:
+      #   * `script:` Generates max defined by the script
+      # * `top_hits:` A number of results that should be return inside the group ranked by score.
       #
       # #### Examples
       # ```
       # Aggregation.parse(group_by: :status)
       # => { status: { terms: { field: :status } } }
       #
+      # Aggregation.parse(group_max: :contents_count)
+      # => { status: { max: { field: :contents_count } } }
+      #
       # Aggregation.parse(group_by: [:status, size: 5, top_hits: 3])
       # => { status: { terms: { field: :status, size: 5 }, aggs: { top_status: { top_hits: 3 } } } }
       def parse(options)
-        parse_group_by(options[:group_by]).to_h
+        parse_aggregations(options).each_with_object({}) { |a, h| h.merge!(a.to_h) }
       end
 
       private
 
-      def parse_group_by(options_group_by)
-        return {} if options_group_by.blank?
+      def parse_aggregations(options, root_aggregation = nil)
+        parse_options = options.slice(*PARSE_AGGREGATIONS)
+        return root_aggregation if parse_options.blank?
 
-        field, options = options_group_by
-        options ||= {}
-
-        aggregation = Aggregation::Terms.new(field, field, options.except(:top_hits))
-        if options[:top_hits]
-          aggregation = Aggregation::TopHits.new(:"top_#{field}", aggregation, options[:top_hits])
+        aggregations = parse_options.map do |aggregation_name, aggregation_options|
+          parse_singular_aggregation(root_aggregation, aggregation_name, aggregation_options)
         end
 
-        aggregation
+        aggregations = Aggregation::Nested.new(root_aggregation, aggregations) if root_aggregation
+        aggregations
+      end
+
+      def parse_singular_aggregation(root_aggregation, aggregation_name, aggregation_options)
+        case aggregation_name
+        when :group_by then parse_field_aggregation(Aggregation::Terms, :by, aggregation_options)
+        when :group_max then parse_field_aggregation(Aggregation::Max, :max, aggregation_options)
+        when :top_hits then parse_top_hits(root_aggregation, aggregation_options)
+        end
+      end
+
+      def parse_field_aggregation(aggregation_class, prefix, options_aggregation)
+        return {} if options_aggregation.blank?
+
+        field, options = options_aggregation
+        options ||= {}
+
+        name = :"#{prefix}_#{field}"
+        aggregation = aggregation_class.new(name, field, options.except(*PARSE_AGGREGATIONS))
+        parse_aggregations(options, aggregation)
+      end
+
+      def parse_top_hits(root_aggregation, options_top_hits)
+        return {} if options_top_hits.blank?
+
+        size, options = options_top_hits
+        options ||= {}
+
+        name = :"top_#{root_aggregation.name}"
+        aggregation = Aggregation::TopHits.new(name, size, options.except(*PARSE_AGGREGATIONS))
+        parse_aggregations(options, aggregation)
       end
     end
   end

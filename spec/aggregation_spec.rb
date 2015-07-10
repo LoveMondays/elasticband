@@ -28,17 +28,17 @@ RSpec.describe Elasticband::Aggregation do
       context 'with the field_name' do
         let(:options) { { group_by: :status } }
 
-        it { is_expected.to eq(status: { terms: { field: :status } }) }
+        it { is_expected.to eq(by_status: { terms: { field: :status } }) }
       end
 
-      context 'with an array with field_name and :top_hits option' do
+      context 'with an array with field_name and other aggregation' do
         let(:options) { { group_by: [:status, top_hits: 3] } }
 
         it 'returns the `terms` aggregation with a `top_hits` nested' do
           is_expected.to eq(
-            status: {
+            by_status: {
               terms: { field: :status },
-              aggs: { top_status: { top_hits: { size: 3 } } }
+              aggs: { top_by_status: { top_hits: { size: 3 } } }
             }
           )
         end
@@ -47,7 +47,32 @@ RSpec.describe Elasticband::Aggregation do
       context 'with an array with field_name and other options' do
         let(:options) { { group_by: [:status, size: 3] } }
 
-        it { is_expected.to eq(status: { terms: { field: :status, size: 3 } }) }
+        it { is_expected.to eq(by_status: { terms: { field: :status, size: 3 } }) }
+      end
+    end
+
+    context 'with `:group_max` option' do
+      context 'with the field_name' do
+        let(:options) { { group_max: :price } }
+
+        it { is_expected.to eq(max_price: { max: { field: :price } }) }
+      end
+
+      context 'with an array with field_name and options' do
+        let(:options) { { group_max: [:price, script: '_value * 1.2'] } }
+
+        it { is_expected.to eq(max_price: { max: { field: :price, script: '_value * 1.2' } }) }
+      end
+    end
+
+    context 'with more than one aggregation' do
+      let(:options) { { group_by: :status, group_max: :price } }
+
+      it 'returns a hash with all aggregations' do
+        is_expected.to eq(
+          by_status: { terms: { field: :status } },
+          max_price: { max: { field: :price } }
+        )
       end
     end
   end
