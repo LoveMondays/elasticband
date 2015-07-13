@@ -43,7 +43,11 @@ module Elasticband
       # Aggregation.parse(group_by: [:status, size: 5, top_hits: 3])
       # => { status: { terms: { field: :status, size: 5 }, aggs: { top_status: { top_hits: 3 } } } }
       def parse(options)
-        parse_aggregations(options).each_with_object({}) { |a, h| h.merge!(a.to_h) }
+        merge(*parse_aggregations(options))
+      end
+
+      def merge(*aggregations)
+        aggregations.each_with_object({}) { |a, h| h.merge!(a.to_h) }
       end
 
       private

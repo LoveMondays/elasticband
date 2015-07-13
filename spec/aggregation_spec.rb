@@ -76,4 +76,23 @@ RSpec.describe Elasticband::Aggregation do
       end
     end
   end
+
+  describe '.merge' do
+    subject { described_class.merge(aggregation_1, aggregation_2) }
+
+    let(:aggregation_1) { Elasticband::Aggregation.new(:aggregation_1) }
+    let(:aggregation_2) { Elasticband::Aggregation.new(:aggregation_2) }
+
+    before do
+      allow(aggregation_1).to receive(:to_h) { { aggregation_1: { key_1: :value_1 } } }
+      allow(aggregation_2).to receive(:to_h) { { aggregation_2: { key_2: :value_2 } } }
+    end
+
+    it 'returns a hash with all aggregations' do
+      is_expected.to eq(
+        aggregation_1: { key_1: :value_1 },
+        aggregation_2: { key_2: :value_2 }
+      )
+    end
+  end
 end

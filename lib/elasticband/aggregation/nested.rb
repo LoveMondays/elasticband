@@ -17,7 +17,7 @@ module Elasticband
       private
 
       def nested_hash
-        nested_aggregations.each_with_object({}) { |a, h| h.merge!(a.to_h) }
+        self.class.merge(*nested_aggregations)
       end
     end
   end
