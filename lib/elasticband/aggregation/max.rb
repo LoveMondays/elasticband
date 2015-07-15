@@ -1,8 +1,8 @@
 module Elasticband
   class Aggregation
-    class Terms < FieldBased
+    class Max < FieldBased
       def type
-        :terms
+        :max
       end
     end
   end

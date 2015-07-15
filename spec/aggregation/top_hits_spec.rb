@@ -2,25 +2,16 @@ require 'spec_helper'
 
 RSpec.describe Elasticband::Aggregation::TopHits do
   describe '#to_h' do
-    subject { described_class.new(:top_hits_aggregation, root_aggregation, 3).to_h }
+    context 'without options' do
+      subject { described_class.new(:top_hits_aggregation, 3).to_h }
 
-    let(:root_aggregation) { Elasticband::Aggregation.new(:root_aggregation) }
-
-    before do
-      allow(root_aggregation).to receive(:to_h) { { root_aggregation: { terms: { field: :field_name } } } }
+      it { is_expected.to eq(top_hits_aggregation: { top_hits: { size: 3 } }) }
     end
 
-    it 'returns a nested aggreagation hash' do
-      is_expected.to eq(
-        root_aggregation: {
-          terms: { field: :field_name },
-          aggs: {
-            top_hits_aggregation: {
-              top_hits: { size: 3 }
-            }
-          }
-        }
-      )
+    context 'with options' do
+      subject { described_class.new(:top_hits_aggregation, 3, cache: true).to_h }
+
+      it { is_expected.to eq(top_hits_aggregation: { top_hits: { size: 3, cache: true } }) }
     end
   end
 end
