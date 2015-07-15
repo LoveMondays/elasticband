@@ -1,13 +1,23 @@
 language: ruby
 cache: bundler
 rvm:
-  - 2.2
-  - ruby-head
+- 2.2
+- ruby-head
 git:
   depth: 1
 script:
-  - bundle exec rspec
-  - bundle exec rubocop
-addons:
+- bundle exec rspec
+- bundle exec rubocop
+add_ons:
   code_climate:
-    repo_token: 217146fc082e87b5e4b2352141a8832d0da78d66a9d22cb0b5189344648e821e
+    repo_token:
+      secure: J7KZY6qcRup/D/m1v4dau0UZ4S1UQ5aW+PYago1jMvTZ/KqyPP36rAiRZhzCROjVaodbkwxhGfp+V9eLPGZG+CF3yFAZWCa+YaOR4ihbx7PI+o1KB5Rvo/LfoXTZ2ietGLSHf43ae617pp5uu6IF7scl5NQqaXraE/zQYce4wOWAYTQvxi+lnYHYbPWtAtsBoCNTyFdscHT5LPSGIINaGsPVwVp5WSoOe770vNLqnoPD/FAlB71scCfO5oOrPu1jeQf7kHXNuJGFeVCauSrC23oAcYs15RO8F5LZIH5ikR7wBpaK3TEv98GR27xZaMiP07IGiaXXG0AOWM1wxk4kUuy7jE7Rgd/Q5DU9HlO7pf1RWKRKeJTBocez2SmtGVQjQ1cIqhzmZI/QXipkYuSKUB4HZsKhQMCIZqW5dR9OomviJbrOHSQRNcGhtKWSzgxHAlhC8Fel57jgU/CTZyFoiaFL/qFvddo98CJriPsKGbQFtsXdOE2r5GyS0VOZW8XKpyhvH9E1RKaxnsopfL2Gh/BOZAh7ZI1XWTS7QJQMYHPLsxkf1gQa29T1GV+lo53fuv55HDrJHZ3dphAAngjCQRs6hNdB/m2KgqognwNXrnVRrpSlMq4yvyRHSmfiatXl10bw7iFzQ+h227PP+CzXtRwJlHj5FpUc/voNE0oOaeA=
+deploy:
+  provider: rubygems
+  api_key:
+    secure: GuPR9kqmSoQKhgh/SBpa2+zysNHv3n92hsuA7MyZ0ezgdN41qdZqYJb/w5hZLBuGyDJO8f+Ib1deKw8+3gQO6rsiFwlVW6nrPEcxCRjg/QQSxNk2FuPxh2FF7/n9Ce3ePeVhnmkCAw7++B7OLUo5Un8cR35WHPzChrprQ1RLpbSB6Qg8nwcW92aju6WqUkHrdYEyP/Q94oqzA09gamth8flCPYw8XKeklR8aQ6KkdD4w96Bu3AwBOYbUkIlNNXXj1CCvWwcJf5DQ+DR6JMk0KkaniLxrsSmiTBkVlUIJfEIJMUUuPiAUZ0tvwFtc5Puys987YwpNmqq4eqB3Hxp85FLDEEgxECtlBz5Ab8/rgUuJxlHI6kLPgOw6sseTmTYLG4NJkGj/icjP7LaQYSIry+LVnncM48YIC9nzuBNsF6XfFXfLAAq+u51FFJVF0SihqWYKFSk96d+UHuOtitVQ6Smte4ir+7ifclMgtxgYqBzX50Pv39uysvSpmFYpVkGXiGnVjHAffWhNOVJDJdF2K0BllJP2PyNF4fDrheFNS6lQj394aewCGkvLzyHIht903KC8+IvD4u4KQktA7q/ctn6dODfjXUn6eIaS5lXYeLNI7OHUR8fsMDJyiNEleBHKVs9KAVqjKJFsaH/ZY90VuAQ/3U/J3a3PsCHUZ2iDuTU=
+  gem: elasticband
+  on:
+    tags: true
+    repo: LoveMondays/elasticband
+    branch: master
