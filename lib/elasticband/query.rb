@@ -11,14 +11,12 @@ module Elasticband
     end
 
     class << self
-      # Parses a query text with options to a Elasticsearch syntax
+      # Parses a query text with options to a Elasticsearch syntax.
+      # Check Elasticband::Filter.parse for filter options.
       #
       # #### Options
       #
-      # * `on:` Defines which attributes will searched in documents
-      # * `only:` Filter the search results where the condition is `true`
-      # * `except`: Filter the search results where the condition is `false`.
-      # * `includes:` Filter the search results with a `Match` query.
+      # * `on:` Defines which attributes will searched in documents.
       # * `boost_by:` Boosts the score of a query result based on a attribute of the document.
       #   This score will be multiplied for the `boost_by` attribute over function `ln2p`.
       # * `boost_where:` Boosts the score of a query result where some condition is `true`.
@@ -63,22 +61,12 @@ module Elasticband
       # ```
       def parse(query_text, options = {})
         query = parse_on(query_text, options[:on])
-        query = parse_query_filters(query, options.slice(:only, :except, :includes))
+        query = parse_query_filters(query, options)
         query = parse_boost(query, options.slice(:boost_by, :boost_where, :boost_function))
         query.to_h
       end
 
       private
-
-      def to_dotted_notation(hash_params, prefix = nil, dotted_hash = {})
-        hash_params.each_with_object(dotted_hash) do |(key, val), hash|
-          if val.is_a?(Hash)
-            to_dotted_notation(val, "#{prefix}#{key}.", hash)
-          else
-            hash["#{prefix}#{key}"] = val
-          end
-        end
-      end
 
       def parse_on(query_text, on_options)
         return Query.new if query_text.blank?
@@ -91,38 +79,9 @@ module Elasticband
       end
 
       def parse_query_filters(query, filter_options)
-        return query if filter_options.blank?
+        filter = Filter.parse(filter_options)
 
-        filter = parse_filters(filter_options[:only])
-        filter += parse_filters(filter_options[:except]).map { |f| Filter::Not.new(f) }
-        filter += parse_includes_filter(filter_options[:includes])
-        filter = join_filters(filter)
-
-        Query::Filtered.new(filter, query)
-      end
-
-      def join_filters(filters)
-        filters.count > 1 ? Filter::And.new(filters) : filters.first
-      end
-
-      def parse_includes_filter(includes_options)
-        return [] if includes_options.blank?
-
-        [Filter::Query.new(parse(*includes_options))]
-      end
-
-      def parse_filters(options)
-        return [] if options.blank?
-
-        to_dotted_notation(options).map { |attribute, value| parse_filter(attribute, value) }
-      end
-
-      def parse_filter(attribute, value)
-        if value.is_a?(Enumerable)
-          Filter::Terms.new(value, attribute)
-        else
-          Filter::Term.new(value, attribute)
-        end
+        filter.blank? ? query : Query::Filtered.new(filter, query)
       end
 
       def parse_boost(query, boost_options)
@@ -136,7 +95,7 @@ module Elasticband
         if boost_options[:boost_by].present?
           ScoreFunction::FieldValueFactor.new(boost_options[:boost_by], modifier: :ln2p)
         elsif boost_options[:boost_where].present?
-          filter = join_filters(parse_filters(boost_options[:boost_where]))
+          filter = Filter.parse(only: boost_options[:boost_where])
           ScoreFunction::Filtered.new(filter, ScoreFunction::BoostFactor.new(1_000))
         else
           boost_function, boost_function_params = boost_options[:boost_function]
