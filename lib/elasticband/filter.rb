@@ -6,6 +6,8 @@ require 'elasticband/filter/terms'
 
 module Elasticband
   class Filter
+    PARSE_FILTERS = %i(only except includes)
+
     def to_h
       { match_all: {} }
     end
