@@ -43,162 +43,13 @@ RSpec.describe Elasticband::Query do
         end
       end
 
-      context 'with `:only/:except` option' do
-        context 'with only `:only` option' do
-          context 'with a single clause' do
-            let(:options) { { only: { status: :published } } }
+      context 'with filters options' do
+        let(:options) { { only: { status: :published } } }
 
-            it 'returns a filtered query with a `term` filter' do
-              is_expected.to eq(
-                filtered: {
-                  query: { match: { _all: 'foo' } },
-                  filter: { term: { status: :published } }
-                }
-              )
-            end
-          end
+        before { expect(Elasticband::Filter).to receive(:parse).with(options) { { name: 'filter' } } }
 
-          context 'with multiple clauses' do
-            let(:options) { { only: { status: :published, company_id: 1 } } }
-
-            it 'returns a filtered query with an `and` filter' do
-              is_expected.to eq(
-                filtered: {
-                  query: { match: { _all: 'foo' } },
-                  filter: {
-                    and: [
-                      { term: { status: :published } },
-                      term: { company_id: 1 }
-                    ]
-                  }
-                }
-              )
-            end
-          end
-
-          context 'with a nested attribute' do
-            let(:options) { { only: { company: { id: 1 } } } }
-
-            it 'returns a filtered query with a `term` filter on dotted notation' do
-              is_expected.to eq(
-                filtered: {
-                  query: { match: { _all: 'foo' } },
-                  filter: { term: { 'company.id': 1 } }
-                }
-              )
-            end
-          end
-
-          context 'with multiple values' do
-            let(:options) { { only: { status: %i(published rejected) } } }
-
-            it 'returns a filtered query with a `terms` filter' do
-              is_expected.to eq(
-                filtered: {
-                  query: { match: { _all: 'foo' } },
-                  filter: { terms: { status: %i(published rejected) } }
-                }
-              )
-            end
-          end
-        end
-
-        context 'with only `:except` option' do
-          context 'with a single clause' do
-            let(:options) { { except: { status: :published } } }
-
-            it 'returns a filtered query with a `not` filter wrapping a `term` filter' do
-              is_expected.to eq(
-                filtered: {
-                  query: { match: { _all: 'foo' } },
-                  filter: { not: { term: { status: :published } } }
-                }
-              )
-            end
-          end
-
-          context 'with multiple clauses' do
-            let(:options) { { except: { status: :published, company_id: 1 } } }
-
-            it 'returns a filtered query with a `not` filter wrapping an `and` filter' do
-              is_expected.to eq(
-                filtered: {
-                  query: { match: { _all: 'foo' } },
-                  filter: {
-                    and: [
-                      { not: { term: { status: :published } } },
-                      not: { term: { company_id: 1 } }
-                    ]
-                  }
-                }
-              )
-            end
-          end
-
-          context 'with a nested attribute' do
-            let(:options) { { except: { company: { id: 1 } } } }
-
-            it 'returns a filtered query with a `not` filter wrapping a `term` filter on dotted notation' do
-              is_expected.to eq(
-                filtered: {
-                  query: { match: { _all: 'foo' } },
-                  filter: { not: { term: { 'company.id': 1 } } }
-                }
-              )
-            end
-          end
-
-          context 'with multiple values' do
-            let(:options) { { except: { status: %i(published rejected) } } }
-
-            it 'returns a filtered query with `not` filter wrapping a `terms` filter' do
-              is_expected.to eq(
-                filtered: {
-                  query: { match: { _all: 'foo' } },
-                  filter: { not: { terms: { status: %i(published rejected) } } }
-                }
-              )
-            end
-          end
-        end
-
-        context 'with both options' do
-          let(:options) { { only: { status: :published }, except: { company_id: 1 } } }
-
-          it 'returns a filtered query combining the filters' do
-            is_expected.to eq(
-              filtered: {
-                query: { match: { _all: 'foo' } },
-                filter: {
-                  and: [
-                    { term: { status: :published } },
-                    not: { term: { company_id: 1 } }
-                  ]
-                }
-              }
-            )
-          end
-        end
-      end
-
-      context 'with `:includes` option' do
-        let(:options) { { includes: ['bar', on: :description] } }
-
-        it 'returns a filtered query with query filter' do
-          is_expected.to eq(
-            filtered: {
-              query: { match: { _all: 'foo' } },
-              filter: {
-                query: { match: { description: 'bar' } }
-              }
-            }
-          )
-        end
-
-        it 'calls `.parse` for the includes option' do
-          allow(described_class).to receive(:parse).with('foo', options).and_call_original
-          expect(described_class).to receive(:parse).with('bar', on: :description).and_call_original
-          subject
+        it 'return a filtered query' do
+          is_expected.to eq(filtered: { query: { match: { _all: 'foo' } }, filter: { name: 'filter' } })
         end
       end
 
@@ -256,24 +107,12 @@ RSpec.describe Elasticband::Query do
       context 'with `:boost_where` option' do
         context 'with a regular attribute' do
           let(:options) { { boost_where: { status: :published } } }
+          let(:filter_options) { { only: { status: :published } } }
 
-          it 'returns a function score query with a `boost_factor` filtered function' do
-            is_expected.to eq(
-              function_score: {
-                query: { match: { _all: 'foo' } },
-                functions: [
-                  {
-                    filter: { term: { status: :published } },
-                    boost_factor: 1000
-                  }
-                ]
-              }
-            )
+          before do
+            allow(Elasticband::Filter).to receive(:parse)
+            expect(Elasticband::Filter).to receive(:parse).with(filter_options) { { name: 'filter' } }
           end
-        end
-
-        context 'with a multiple attributes' do
-          let(:options) { { boost_where: { status: :published, company_id: 1 } } }
 
           it 'returns a function score query with a `boost_factor` filtered function' do
             is_expected.to eq(
@@ -281,48 +120,7 @@ RSpec.describe Elasticband::Query do
                 query: { match: { _all: 'foo' } },
                 functions: [
                   {
-                    filter: {
-                      and: [
-                        { term: { status: :published } },
-                        term: { company_id: 1 }
-                      ]
-                    },
-                    boost_factor: 1000
-                  }
-                ]
-              }
-            )
-          end
-        end
-
-        context 'with a nested attribute' do
-          let(:options) { { boost_where: { company: { id: 1 } } } }
-
-          it 'returns a function score query with a `boost_factor` filtered function' do
-            is_expected.to eq(
-              function_score: {
-                query: { match: { _all: 'foo' } },
-                functions: [
-                  {
-                    filter: { term: { 'company.id': 1 } },
-                    boost_factor: 1000
-                  }
-                ]
-              }
-            )
-          end
-        end
-
-        context 'with multiple values' do
-          let(:options) { { boost_where: { status: %i(published rejected) } } }
-
-          it 'returns a function score query with a `boost_factor` filtered function' do
-            is_expected.to eq(
-              function_score: {
-                query: { match: { _all: 'foo' } },
-                functions: [
-                  {
-                    filter: { terms: { status: %i(published rejected) } },
+                    filter: { name: 'filter' },
                     boost_factor: 1000
                   }
                 ]
