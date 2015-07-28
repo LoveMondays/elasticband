@@ -65,6 +65,15 @@ RSpec.describe Elasticband::Aggregation do
       end
     end
 
+    context 'with `:group_by_filter` option' do
+      let(:options) { { group_by_filter: [:published_results, filter_options] } }
+      let(:filter_options) { { only: { status: :published } } }
+
+      before { expect(Elasticband::Filter).to receive(:parse).with(filter_options) { { name: 'filter' } } }
+
+      it { is_expected.to eq(published_results: { filter: { name: 'filter' } }) }
+    end
+
     context 'with more than one aggregation' do
       let(:options) { { group_by: :status, group_max: :price } }
 
