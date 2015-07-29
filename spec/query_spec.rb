@@ -62,7 +62,8 @@ RSpec.describe Elasticband::Query do
               query: { match: { _all: 'foo' } },
               field_value_factor: {
                 field: :contents_count,
-                modifier: :ln2p
+                modifier: :ln2p,
+                missing: 1
               }
             }
           )

@@ -93,7 +93,7 @@ module Elasticband
 
       def parse_boost_function(boost_options)
         if boost_options[:boost_by].present?
-          ScoreFunction::FieldValueFactor.new(boost_options[:boost_by], modifier: :ln2p)
+          ScoreFunction::FieldValueFactor.new(boost_options[:boost_by], modifier: :ln2p, missing: 1)
         elsif boost_options[:boost_where].present?
           filter = Filter.parse(only: boost_options[:boost_where])
           ScoreFunction::Filtered.new(filter, ScoreFunction::BoostFactor.new(1_000))
