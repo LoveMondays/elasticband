@@ -7,6 +7,7 @@ require 'elasticband/aggregation'
 require 'elasticband/filter'
 require 'elasticband/query'
 require 'elasticband/search'
+require 'elasticband/sort'
 require 'elasticband/version'
 
 module Elasticband

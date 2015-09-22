@@ -7,11 +7,18 @@ module Elasticband
       # #### Examples
       # ```
       # Search.parse('foo', on: :name, group_by: :status)
-      # => { query: { match: { name: 'foo' } }, aggs: { status: { terms: { field: :status } } } }
+      # => {
+      #      query: { match: { name: 'foo' } },
+      #      aggs: { status: { terms: { field: :status } } },
+      #      sort: [{name: 'desc'}, '+created_at']
+      #    }
       # ```
       def parse(query_text, options)
-        hash = { query: Query.parse(query_text, options), aggs: Aggregation.parse(options) }
-        hash.reject { |_, value| value.blank? }
+        {
+          sort: Sort.parse(options),
+          query: Query.parse(query_text, options),
+          aggs: Aggregation.parse(options)
+        }.reject { |_, value| value.blank? }
       end
     end
   end
