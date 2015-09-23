@@ -1,5 +1,10 @@
 # Elasticband
-[![Build Status](https://travis-ci.org/LoveMondays/elasticband.svg)](https://travis-ci.org/LoveMondays/elasticband) [![Code Climate](https://codeclimate.com/github/LoveMondays/elasticband/badges/gpa.svg)](https://codeclimate.com/github/LoveMondays/elasticband) [![Test Coverage](https://codeclimate.com/github/LoveMondays/elasticband/badges/coverage.svg)](https://codeclimate.com/github/LoveMondays/elasticband/coverage)
+
+[![Build Status](https://travis-ci.org/LoveMondays/elasticband.svg)](https://travis-ci.org/LoveMondays/elasticband)
+[![Code Climate](https://codeclimate.com/github/LoveMondays/elasticband/badges/gpa.svg)](https://codeclimate.com/github/LoveMondays/elasticband)
+[![Test Coverage](https://codeclimate.com/github/LoveMondays/elasticband/badges/coverage.svg)](https://codeclimate.com/github/LoveMondays/elasticband/coverage)
+[![Gem Version](https://badge.fury.io/rb/elasticband.svg)](http://badge.fury.io/rb/elasticband)
+[![Dependency Status](https://gemnasium.com/LoveMondays/elasticband.svg)](https://gemnasium.com/LoveMondays/elasticband)
 
 Query builder for [elasticsearch-rails gem](https://github.com/elastic/elasticsearch-rails)
 
