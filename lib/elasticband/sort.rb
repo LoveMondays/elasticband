@@ -9,32 +9,51 @@ module Elasticband
       #
       # #### Examples
       # ```
-      # Sort.parse(sort: [{ name: :desc }])
+      # Sort.parse(sort: { name: :desc })
       # => { sort: [{ name: :desc }] }
       #
-      # Sort.parse(sort: [{ name: :asc }])
-      # => { sort: [{ name: :asc }] }
+      # Sort.parse(sort: [{ name: :desc }, { created_at: :asc }])
+      # => { sort: [{ name: :desc }, { created_at: :asc }] }
       #
-      # Sort.parse(sort: ['+name'])
-      # => { sort: [{ name: :asc }] }
+      # Sort.parse(sort: '-name,+created_at,id')
+      # => { sort: [{ name: :desc }, { created_at: :asc }, { id: :asc }] }
       #
-      # Sort.parse(sort: ['-name'])
-      # => { sort: [{ name: :desc }] }
+      # Sort.parse(sort: ['-name', '+created_at', 'id'])
+      # => { sort: [{ name: :desc }, { created_at: :asc }, { id: :asc }] }
       # ```
       def parse(options)
-        options[:sort].map { |param| parse_param(param) }
+        new(options[:sort]).parse
       end
+    end
 
-      private
+    attr_reader :sort_by
 
-      def parse_param(param)
-        return param unless param.is_a?(String)
+    def initialize(sort_by)
+      @sort_by = sort_by
+    end
 
-        direction = param.start_with?('-') ? :desc : :asc
-        field = param.start_with?('-') || param.start_with?('+') ? param[1..-1] : param
+    def parse
+      return if sort_by.blank?
+      return [sort_by] if sort_by.is_a?(Hash)
 
-        { field.to_sym => direction }
-      end
+      @sort_by = sort_by.split(','.freeze) if sort_by.is_a?(String)
+      sort_by.map { |param| parse_param(param) }
+    end
+
+    private
+
+    def parse_param(param)
+      return param if param.is_a?(Hash)
+
+      { field(param).to_sym => direction(param) }
+    end
+
+    def field(param)
+      param.start_with?('-'.freeze) || param.start_with?('+'.freeze) ? param[1..-1] : param
+    end
+
+    def direction(param)
+      param.start_with?('-'.freeze) ? :desc : :asc
     end
   end
 end
