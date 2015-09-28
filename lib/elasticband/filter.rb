@@ -1,12 +1,13 @@
 require 'elasticband/filter/and'
 require 'elasticband/filter/not'
 require 'elasticband/filter/query'
+require 'elasticband/filter/range'
 require 'elasticband/filter/term'
 require 'elasticband/filter/terms'
 
 module Elasticband
   class Filter
-    PARSE_FILTERS = %i(only except includes)
+    PARSE_FILTERS = %i(only except includes range)
 
     def to_h
       { match_all: {} }
@@ -20,6 +21,7 @@ module Elasticband
       # * `only:` Filter the search results where the condition is `true`
       # * `except`: Filter the search results where the condition is `false`.
       # * `includes:` Filter the search results with a `Match` query.
+      # * `range:` Filter the search results where the condition is on the given range.
       #
       # #### Examples
       # ```
@@ -31,6 +33,9 @@ module Elasticband
       #
       # Filter.parse(includes: ['company', on: :description])
       # => { query: { match: { description: 'company' } } }
+      #
+      # Filter.parse(range: { companies_count: { gt: 1, gteq: 1, lt: 1, lteq: 1 } })
+      # => { range: { companies_count: { gt: 1, gte: 1, lt: 1, lte: 1 } } }
       # ```
       def parse(options = {})
         return {} if options.blank?
@@ -38,6 +43,7 @@ module Elasticband
         filter = parse_filters(options[:only])
         filter += parse_filters(options[:except]).map { |f| Filter::Not.new(f) }
         filter += parse_includes_filter(options[:includes])
+        filter += parse_range_filter(options[:range])
         join_filters(filter).to_h
       end
 
@@ -51,6 +57,12 @@ module Elasticband
         return [] if includes_options.blank?
 
         [Filter::Query.new(Elasticband::Query.parse(*includes_options))]
+      end
+
+      def parse_range_filter(range_options)
+        return [] if range_options.blank?
+
+        [Filter::Range.new(range_options.keys.first, range_options.values.first)]
       end
 
       def parse_filters(options)

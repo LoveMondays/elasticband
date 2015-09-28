@@ -83,5 +83,19 @@ RSpec.describe Elasticband::Filter do
 
       it { is_expected.to eq(query: { name: 'query' }) }
     end
+
+    context 'with `:range` option' do
+      context 'with one range' do
+        let(:options) { { range: { foo: { gt: 1 } } } }
+
+        it { is_expected.to eq(range: { foo: { gt: 1 } }) }
+      end
+
+      context 'with more than one range' do
+        let(:options) { { range: { foo: { gt: 1, lt: 2 } } } }
+
+        it { is_expected.to eq(range: { foo: { gt: 1, lt: 2 } }) }
+      end
+    end
   end
 end
