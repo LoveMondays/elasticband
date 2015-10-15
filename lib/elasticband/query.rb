@@ -22,6 +22,8 @@ module Elasticband
       # * `boost_where:` Boosts the score of a query result where some condition is `true`.
       #   This score will be multiplied by 1000 (arbitrary, based on gem `searchkick`)
       # * `boost_function:` Boosts using the function passed.
+      # * `boost_mode:` Defines how the function_score will be used.
+      # * `score_mode:` Defines how the query score will be used.
       #
       # #### Examples
       # ```
@@ -49,6 +51,12 @@ module Elasticband
       # Query.parse('foo', boost_function: "_score * doc['users_count'].value")
       # => { function_score: { query: ..., script_score: { script: '_score * doc['users_count'].value' } } }
       #
+      # Query.parse('foo', boost_function: ..., boost_mode: :multiply)
+      # => { function_score: { query: ..., boost_mode: :multiply, script_score: { script: ... } } }
+      #
+      # Query.parse('foo', boost_function: ..., score_mode: :multiply)
+      # => { function_score: { query: ..., score_mode: :multiply, script_score: { script: ... } } }
+      #
       # Query.parse('foo', boost_where: { company: { id: 1 } })
       # => {
       #      function_score: {
@@ -62,7 +70,12 @@ module Elasticband
       def parse(query_text, options = {})
         query = parse_on(query_text, options[:on])
         query = parse_query_filters(query, options)
-        query = parse_boost(query, options.slice(:boost_by, :boost_where, :boost_function))
+        query = parse_boost(
+          query,
+          options.slice(:boost_by, :boost_where, :boost_function),
+          options.slice(:score_mode),
+          options.slice(:boost_mode)
+        )
         query.to_h
       end
 
@@ -84,11 +97,14 @@ module Elasticband
         filter.blank? ? query : Query::Filtered.new(filter, query)
       end
 
-      def parse_boost(query, boost_options)
+      def parse_boost(query, boost_options, score_mode_option, boost_mode_option)
         return query if boost_options.blank?
 
         function = parse_boost_function(boost_options)
-        Query::FunctionScore.new(query, function)
+        score_mode = Query::ScoreFunction::ScoreMode.new(score_mode_option)
+        boost_mode = Query::ScoreFunction::BoostMode.new(boost_mode_option)
+
+        Query::FunctionScore.new(query, function, score_mode, boost_mode)
       end
 
       def parse_boost_function(boost_options)
