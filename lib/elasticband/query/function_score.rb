@@ -1,12 +1,13 @@
 module Elasticband
   class Query
     class FunctionScore < Query
-      attr_accessor :query_or_filter, :function, :options
+      attr_accessor :query_or_filter, :function, :score_mode, :boost_mode
 
-      def initialize(query_or_filter, function, options = {})
+      def initialize(query_or_filter, function, score_mode, boost_mode)
         self.query_or_filter = query_or_filter
         self.function = function
-        self.options = options
+        self.score_mode = score_mode
+        self.boost_mode = boost_mode
       end
 
       def to_h
@@ -16,7 +17,7 @@ module Elasticband
       private
 
       def function_score_hash
-        query_or_filter_hash.merge!(function_hash).merge!(options)
+        query_or_filter_hash.merge!(function_hash).merge(score_mode.to_h).merge(boost_mode.to_h)
       end
 
       def query_or_filter_hash
