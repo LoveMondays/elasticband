@@ -67,6 +67,40 @@ RSpec.describe Elasticband::Query do
             }
           )
         end
+
+        context 'with `:boost_mode` option' do
+          let(:options) { { boost_by: :contents_count, boost_mode: :multiply } }
+
+          it 'returns a function score query with the boost_mode' do
+            is_expected.to eq(
+              function_score: {
+                query: { match: { _all: 'foo' } },
+                boost_mode: :multiply,
+                field_value_factor: {
+                  field: :contents_count,
+                  modifier: :ln2p
+                }
+              }
+            )
+          end
+        end
+
+        context 'with `:score_mode` option' do
+          let(:options) { { boost_by: :contents_count, score_mode: :multiply } }
+
+          it 'returns a function score query with the score_mode' do
+            is_expected.to eq(
+              function_score: {
+                query: { match: { _all: 'foo' } },
+                score_mode: :multiply,
+                field_value_factor: {
+                  field: :contents_count,
+                  modifier: :ln2p
+                }
+              }
+            )
+          end
+        end
       end
 
       context 'with `:boost_function` option' do
@@ -82,6 +116,38 @@ RSpec.describe Elasticband::Query do
                 }
               }
             )
+          end
+
+          context 'with `:boost_mode` option' do
+            let(:options) { { boost_function: "_score * doc['users_count'].value", boost_mode: :multiply } }
+
+            it 'returns a function score query with the boost_mode' do
+              is_expected.to eq(
+                function_score: {
+                  query: { match: { _all: 'foo' } },
+                  boost_mode: :multiply,
+                  script_score: {
+                    script: "_score * doc['users_count'].value"
+                  }
+                }
+              )
+            end
+          end
+
+          context 'with `:score_mode` option' do
+            let(:options) { { boost_function: "_score * doc['users_count'].value", score_mode: :multiply } }
+
+            it 'returns a function score query with the score_mode' do
+              is_expected.to eq(
+                function_score: {
+                  query: { match: { _all: 'foo' } },
+                  score_mode: :multiply,
+                  script_score: {
+                    script: "_score * doc['users_count'].value"
+                  }
+                }
+              )
+            end
           end
         end
 
@@ -126,6 +192,44 @@ RSpec.describe Elasticband::Query do
                 ]
               }
             )
+          end
+
+          context 'with `:boost_mode` option' do
+            let(:options) { { boost_where: { status: :published }, boost_mode: :multiply } }
+
+            it 'returns a function score query with the boost_mode' do
+              is_expected.to eq(
+                function_score: {
+                  query: { match: { _all: 'foo' } },
+                  boost_mode: :multiply,
+                  functions: [
+                    {
+                      filter: { name: 'filter' },
+                      boost_factor: 1000
+                    }
+                  ]
+                }
+              )
+            end
+          end
+
+          context 'with `:score_mode` option' do
+            let(:options) { { boost_where: { status: :published }, score_mode: :multiply } }
+
+            it 'returns a function score query with the score_mode' do
+              is_expected.to eq(
+                function_score: {
+                  query: { match: { _all: 'foo' } },
+                  score_mode: :multiply,
+                  functions: [
+                    {
+                      filter: { name: 'filter' },
+                      boost_factor: 1000
+                    }
+                  ]
+                }
+              )
+            end
           end
         end
       end

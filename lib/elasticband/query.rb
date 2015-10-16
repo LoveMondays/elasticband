@@ -73,8 +73,8 @@ module Elasticband
         query = parse_boost(
           query,
           options.slice(:boost_by, :boost_where, :boost_function),
-          options.slice(:score_mode),
-          options.slice(:boost_mode)
+          options[:score_mode],
+          options[:boost_mode]
         )
         query.to_h
       end
