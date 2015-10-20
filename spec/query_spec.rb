@@ -233,6 +233,33 @@ RSpec.describe Elasticband::Query do
           end
         end
       end
+
+      context 'with `:geo_location` options' do
+        let(:options) do
+          {
+            geo_location: {
+              latitude: 12.5,
+              longitude: -34.9,
+              distance: { same_score: '5km', half_score: '10km' }
+            }
+          }
+        end
+
+        it 'returns a function score query with the score_mode' do
+          is_expected.to eq(
+            function_score: {
+              query: { match: { _all: 'foo' } },
+              gauss: {
+                location: {
+                  origin: { lat: 12.5, lon: -34.9 },
+                  offset: '5km',
+                  scale: '10km'
+                }
+              }
+            }
+          )
+        end
+      end
     end
   end
 end
