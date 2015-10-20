@@ -24,6 +24,7 @@ module Elasticband
       # * `boost_function:` Boosts using the function passed.
       # * `boost_mode:` Defines how the function_score will be used.
       # * `score_mode:` Defines how the query score will be used.
+      # * `geo_location:` Defines query by geo location.
       #
       # #### Examples
       # ```
@@ -66,12 +67,27 @@ module Elasticband
       #        ]
       #      }
       #    }
+      #
+      # Query.parse(
+      #   'foo',
+      #   geo_location: {
+      #     on: :location,
+      #     latitude: 12,
+      #     longitude: 34,
+      #     distance: { same_score: '5km', half_score: '10km' }
+      #   }
+      # )
+      # => {
+      #      function_score: {
+      #        query: ...,
+      #        gauss: { location: { origin: { lat: 12, lon: 34 }, offset: '5km', scale: '10km' } } } }
       # ```
       def parse(query_text, options = {})
         query = parse_on(query_text, options[:on])
         query = parse_query_filters(query, options)
         query = parse_boost(
           query,
+          options[:geo_location],
           options.slice(:boost_by, :boost_where, :boost_function),
           options[:score_mode],
           options[:boost_mode]
@@ -97,14 +113,21 @@ module Elasticband
         filter.blank? ? query : Query::Filtered.new(filter, query)
       end
 
-      def parse_boost(query, boost_options, score_mode_option, boost_mode_option)
-        return query if boost_options.blank?
+      def parse_boost(query, geo_location_options, boost_options, score_mode_option, boost_mode_option)
+        return query if boost_options.blank? && geo_location_options.blank?
 
-        function = parse_boost_function(boost_options)
+        functions = score_functions(geo_location_options, boost_options)
         score_mode = Query::ScoreFunction::ScoreMode.new(score_mode_option)
         boost_mode = Query::ScoreFunction::BoostMode.new(boost_mode_option)
 
-        Query::FunctionScore.new(query, function, score_mode, boost_mode)
+        Query::FunctionScore.new(query, functions, score_mode, boost_mode)
+      end
+
+      def score_functions(geo_location_options, boost_options)
+        functions = []
+        functions << Query::ScoreFunction::GeoLocation.new(geo_location_options) if geo_location_options
+        functions << parse_boost_function(boost_options) if boost_options.present?
+        functions
       end
 
       def parse_boost_function(boost_options)
