@@ -81,6 +81,14 @@ module Elasticband
       #      function_score: {
       #        query: ...,
       #        gauss: { location: { origin: { lat: 12, lon: 34 }, offset: '5km', scale: '10km' } } } }
+      #
+      # Query.parse('foo', near: { on: :location, latitude: 12, longitude: 34, distance: '5km' })
+      # => {
+      #      filtered: {
+      #        query: ...,
+      #        filter: { geo_distance: { location: { lat: 12, lon: 34 } }, distance: '5km' }
+      #      }
+      #    }
       # ```
       def parse(query_text, options = {})
         query = parse_on(query_text, options[:on])

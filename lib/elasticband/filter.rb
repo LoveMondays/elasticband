@@ -2,12 +2,13 @@ require 'elasticband/filter/and'
 require 'elasticband/filter/not'
 require 'elasticband/filter/query'
 require 'elasticband/filter/range'
+require 'elasticband/filter/near'
 require 'elasticband/filter/term'
 require 'elasticband/filter/terms'
 
 module Elasticband
   class Filter
-    PARSE_FILTERS = %i(only except includes range)
+    PARSE_FILTERS = %i(only except includes range near)
 
     def to_h
       { match_all: {} }
@@ -22,6 +23,7 @@ module Elasticband
       # * `except`: Filter the search results where the condition is `false`.
       # * `includes:` Filter the search results with a `Match` query.
       # * `range:` Filter the search results where the condition is on the given range.
+      # * `near:` Filter the search results where the results are near a geo point.
       #
       # #### Examples
       # ```
@@ -36,33 +38,46 @@ module Elasticband
       #
       # Filter.parse(range: { companies_count: { gt: 1, gteq: 1, lt: 1, lteq: 1 } })
       # => { range: { companies_count: { gt: 1, gte: 1, lt: 1, lte: 1 } } }
+      #
+      # Filter.parse(near: { latitude: 12, longitude: 34, distance: '5km' })
+      # => { geo_distance: { location: { lat: 12, lon: 34 } }, distance: '5km' }
       # ```
       def parse(options = {})
         return {} if options.blank?
 
-        filter = parse_filters(options[:only])
-        filter += parse_filters(options[:except]).map { |f| Filter::Not.new(f) }
-        filter += parse_includes_filter(options[:includes])
-        filter += parse_range_filter(options[:range])
+        filter = only_and_except_filters(options[:only], options[:except])
+        filter += includes_filter(options[:includes])
+        filter += range_filter(options[:range])
+        filter += near_filter(options[:near])
         join_filters(filter).to_h
       end
 
       private
 
+      def only_and_except_filters(only_options, except_options)
+        parse_filters(only_options) + parse_filters(except_options).map { |f| Filter::Not.new(f) }
+      end
+
       def join_filters(filters)
         filters.count > 1 ? Filter::And.new(filters) : filters.first
       end
 
-      def parse_includes_filter(includes_options)
+      def includes_filter(includes_options)
         return [] if includes_options.blank?
 
         [Filter::Query.new(Elasticband::Query.parse(*includes_options))]
       end
 
-      def parse_range_filter(range_options)
+      def range_filter(range_options)
         return [] if range_options.blank?
 
         [Filter::Range.new(range_options.keys.first, range_options.values.first)]
+      end
+
+      def near_filter(options)
+        return [] if options.blank?
+
+        [Filter::Near.new(options)]
       end
 
       def parse_filters(options)

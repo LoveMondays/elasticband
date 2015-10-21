@@ -260,6 +260,17 @@ RSpec.describe Elasticband::Query do
           )
         end
       end
+
+      context 'with near option' do
+        let(:options) { { near: { on: :location, latitude: 12.5, longitude: -34.9, distance: '5km' } } }
+
+        let(:query) { { match: { _all: 'foo' } } }
+        let(:filter) { { geo_distance: { location: { lat: 12.5, lon: -34.9 }, distance: '5km' } } }
+
+        it 'return a filtered query by geo_distance' do
+          is_expected.to eq(filtered: { query: query, filter: filter })
+        end
+      end
     end
   end
 end
