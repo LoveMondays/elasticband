@@ -5,6 +5,7 @@ require 'elasticband/filter/range'
 require 'elasticband/filter/near'
 require 'elasticband/filter/term'
 require 'elasticband/filter/terms'
+require 'elasticband/filter/script'
 
 module Elasticband
   class Filter
@@ -24,6 +25,7 @@ module Elasticband
       # * `includes:` Filter the search results with a `Match` query.
       # * `range:` Filter the search results where the condition is on the given range.
       # * `near:` Filter the search results where the results are near a geo point.
+      # * `script:` Filter the search results where the results match the script.
       #
       # #### Examples
       # ```
@@ -41,18 +43,29 @@ module Elasticband
       #
       # Filter.parse(near: { latitude: 12, longitude: 34, distance: '5km' })
       # => { geo_distance: { location: { lat: 12, lon: 34 } }, distance: '5km' }
+      #
+      # Filter.parse(script: ['(param1 + param2) > 0', param1: 1, param2: 1])
+      # => { script: { script: '(param1 + param2) > 0', params: { param1: 1, param2: 1 } } }
       # ```
       def parse(options = {})
         return {} if options.blank?
 
-        filter = only_and_except_filters(options[:only], options[:except])
-        filter += includes_filter(options[:includes])
-        filter += range_filter(options[:range])
-        filter += near_filter(options[:near])
-        join_filters(filter).to_h
+        filters = map_filters(options)
+
+        join_filters(filters).to_h
       end
 
       private
+
+      def map_filters(options)
+        filters = only_and_except_filters(options[:only], options[:except])
+        filters += includes_filter(options[:includes])
+        filters += range_filter(options[:range])
+        filters += near_filter(options[:near])
+        filters += script_filter(options[:script])
+
+        filters
+      end
 
       def only_and_except_filters(only_options, except_options)
         parse_filters(only_options) + parse_filters(except_options).map { |f| Filter::Not.new(f) }
@@ -78,6 +91,12 @@ module Elasticband
         return [] if options.blank?
 
         [Filter::Near.new(options)]
+      end
+
+      def script_filter(script_options)
+        return [] if script_options.blank?
+
+        [Filter::Script.new(*script_options)]
       end
 
       def parse_filters(options)
