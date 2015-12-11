@@ -100,7 +100,9 @@ RSpec.describe Elasticband::Filter do
 
     context 'with `:near` option' do
       let(:options) { { near: { on: :location, latitude: 12.5, longitude: -34.9, distance: '5km' } } }
-      let(:filter) { { geo_distance: { location: { lat: 12.5, lon: -34.9 }, distance: '5km' } } }
+      let(:filter) do
+        { geo_distance: { location: { lat: 12.5, lon: -34.9 }, distance: '5km', distance_type: :arc } }
+      end
 
       it { is_expected.to eq(filter) }
     end
