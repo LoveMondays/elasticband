@@ -41,8 +41,8 @@ module Elasticband
       # Filter.parse(range: { companies_count: { gt: 1, gteq: 1, lt: 1, lteq: 1 } })
       # => { range: { companies_count: { gt: 1, gte: 1, lt: 1, lte: 1 } } }
       #
-      # Filter.parse(near: { latitude: 12, longitude: 34, distance: '5km' })
-      # => { geo_distance: { location: { lat: 12, lon: 34 } }, distance: '5km' }
+      # Filter.parse(near: { latitude: 12, longitude: 34, distance: '5km', type: :arc })
+      # => { geo_distance: { location: { lat: 12, lon: 34 } }, distance: '5km', distance_type: :arc }
       #
       # Filter.parse(script: ['(param1 + param2) > 0', param1: 1, param2: 1])
       # => { script: { script: '(param1 + param2) > 0', params: { param1: 1, param2: 1 } } }
