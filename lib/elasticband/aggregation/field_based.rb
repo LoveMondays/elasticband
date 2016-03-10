@@ -14,7 +14,7 @@ module Elasticband
       end
 
       def type
-        fail NotImplementedError
+        raise NotImplementedError
       end
 
       private

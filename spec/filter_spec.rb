@@ -27,7 +27,7 @@ RSpec.describe Elasticband::Filter do
         context 'with a nested attribute' do
           let(:options) { { only: { company: { id: 1 } } } }
 
-          it { is_expected.to eq(term: { 'company.id': 1 }) }
+          it { is_expected.to eq(term: { :'company.id' => 1 }) }
         end
 
         context 'with multiple values' do
@@ -57,7 +57,7 @@ RSpec.describe Elasticband::Filter do
         context 'with a nested attribute' do
           let(:options) { { except: { company: { id: 1 } } } }
 
-          it { is_expected.to eq(not: { term: { 'company.id': 1 } }) }
+          it { is_expected.to eq(not: { term: { :'company.id' => 1 } }) }
         end
 
         context 'with multiple values' do
@@ -103,6 +103,13 @@ RSpec.describe Elasticband::Filter do
       let(:filter) do
         { geo_distance: { location: { lat: 12.5, lon: -34.9 }, distance: '5km', distance_type: :arc } }
       end
+
+      it { is_expected.to eq(filter) }
+    end
+
+    context 'with `:exists` option' do
+      let(:options) { { exists: :user } }
+      let(:filter) { { exists: { field: :user } } }
 
       it { is_expected.to eq(filter) }
     end

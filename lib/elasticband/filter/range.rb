@@ -3,7 +3,7 @@ module Elasticband
     class Range < Filter
       attr_accessor :field, :ranges
 
-      RANGES = %i(gt gteq lt lteq)
+      RANGES = %i(gt gteq lt lteq).freeze
 
       def initialize(field, ranges)
         self.field = field.to_sym
