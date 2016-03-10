@@ -1,4 +1,5 @@
 require 'elasticband/filter/and'
+require 'elasticband/filter/exists'
 require 'elasticband/filter/not'
 require 'elasticband/filter/query'
 require 'elasticband/filter/range'
@@ -9,7 +10,7 @@ require 'elasticband/filter/script'
 
 module Elasticband
   class Filter
-    PARSE_FILTERS = %i(only except includes range near)
+    PARSE_FILTERS = %i(only except exists includes range near).freeze
 
     def to_h
       { match_all: {} }
@@ -31,6 +32,9 @@ module Elasticband
       # ```
       # Filter.parse(only: { status: :published })
       # => { term: { status: :published } }
+      #
+      # Filter.parse(exists: :status)
+      # => { exists: { field: :status } }
       #
       # Filter.parse(except: { company: { id: 1 } })
       # => { not: { term: { status: :published } } }
@@ -59,6 +63,7 @@ module Elasticband
 
       def map_filters(options)
         filters = only_and_except_filters(options[:only], options[:except])
+        filters += exists_filter(options[:exists])
         filters += includes_filter(options[:includes])
         filters += range_filter(options[:range])
         filters += near_filter(options[:near])
@@ -73,6 +78,12 @@ module Elasticband
 
       def join_filters(filters)
         filters.count > 1 ? Filter::And.new(filters) : filters.first
+      end
+
+      def exists_filter(exists_options)
+        return [] if exists_options.blank?
+
+        [Filter::Exists.new(exists_options)]
       end
 
       def includes_filter(includes_options)

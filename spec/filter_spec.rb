@@ -107,6 +107,13 @@ RSpec.describe Elasticband::Filter do
       it { is_expected.to eq(filter) }
     end
 
+    context 'with `:exists` option' do
+      let(:options) { { exists: :user } }
+      let(:filter) { { exists: { field: :user } } }
+
+      it { is_expected.to eq(filter) }
+    end
+
     context 'with `:script` option' do
       let(:options) { { script: ['(param1 + param2) > 0', param1: 1, param2: 1] } }
       let(:filter) { { script: { script: '(param1 + param2) > 0', params: { param1: 1, param2: 1 } } } }
