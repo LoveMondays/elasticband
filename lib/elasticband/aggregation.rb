@@ -7,7 +7,7 @@ require 'elasticband/aggregation/top_hits'
 
 module Elasticband
   class Aggregation
-    PARSE_AGGREGATIONS = %i(group_by group_max top_hits group_by_filter)
+    PARSE_AGGREGATIONS = %i(group_by group_max top_hits group_by_filter).freeze
 
     attr_accessor :name
 

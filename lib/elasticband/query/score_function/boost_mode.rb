@@ -4,7 +4,7 @@ module Elasticband
       class BoostMode < ScoreFunction
         attr_accessor :mode
 
-        MODES = %i(multiply replace sum avg max min)
+        MODES = %i(multiply replace sum avg max min).freeze
 
         def initialize(mode = nil)
           self.mode = mode

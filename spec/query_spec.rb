@@ -39,7 +39,7 @@ RSpec.describe Elasticband::Query do
         context 'with a composed name on `:on` option' do
           let(:options) { { on: 'company.name' } }
 
-          it { is_expected.to eq(match: { 'company.name': 'foo' }) }
+          it { is_expected.to eq(match: { :'company.name' => 'foo' }) }
         end
       end
 

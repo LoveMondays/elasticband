@@ -27,7 +27,7 @@ RSpec.describe Elasticband::Filter do
         context 'with a nested attribute' do
           let(:options) { { only: { company: { id: 1 } } } }
 
-          it { is_expected.to eq(term: { 'company.id': 1 }) }
+          it { is_expected.to eq(term: { :'company.id' => 1 }) }
         end
 
         context 'with multiple values' do
@@ -57,7 +57,7 @@ RSpec.describe Elasticband::Filter do
         context 'with a nested attribute' do
           let(:options) { { except: { company: { id: 1 } } } }
 
-          it { is_expected.to eq(not: { term: { 'company.id': 1 } }) }
+          it { is_expected.to eq(not: { term: { :'company.id' => 1 } }) }
         end
 
         context 'with multiple values' do
